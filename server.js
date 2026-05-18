@@ -148,6 +148,54 @@ app.post('/api/new-order', async (req, res) => {
 });
 
 // ==========================================
+// 5. META WHATSAPP WEBHOOK (REPLY SUNNE KE LIYE)
+// ==========================================
+
+// Meta Webhook Verification (Meta check karega ki humara server zinda hai ya nahi)
+app.get('/webhook', (req, res) => {
+    // Ye code aapke aur Meta ke beech ka password hai
+    const VERIFY_TOKEN = process.env.WEBHOOK_VERIFY_TOKEN || "deepesh_webhook_123";
+    
+    let mode = req.query["hub.mode"];
+    let token = req.query["hub.verify_token"];
+    let challenge = req.query["hub.challenge"];
+
+    if (mode && token) {
+        if (mode === "subscribe" && token === VERIFY_TOKEN) {
+            console.log("BOMB! 💣 Meta Webhook Verified!");
+            res.status(200).send(challenge);
+        } else {
+            res.sendStatus(403);
+        }
+    }
+});
+
+// Customer ka Button Reply Receive karna
+app.post('/webhook', (req, res) => {
+    let body = req.body;
+
+    if (body.object) {
+        if (body.entry && body.entry[0].changes && body.entry[0].changes[0].value.messages && body.entry[0].changes[0].value.messages[0]) {
+            let from = body.entry[0].changes[0].value.messages[0].from; // Customer ka number
+            let msg_body = body.entry[0].changes[0].value.messages[0];
+
+            // Check karna ki kya customer ne Button (Interactive) dabaya hai
+            if (msg_body.type === "interactive") {
+                let button_reply = msg_body.interactive.button_reply.id; // Button ki ID
+                console.log(`\n🔥 JABARDAST! Customer ${from} ne button dabaya: ${button_reply}`);
+                
+                // Yahan hum aage chalkar apne Dashboard ka status update karenge
+            } else {
+                console.log(`Customer ${from} ne text bheja:`, msg_body.text?.body);
+            }
+        }
+        res.sendStatus(200);
+    } else {
+        res.sendStatus(404);
+    }
+});
+
+// ==========================================
 // SERVER START
 // ==========================================
 const PORT = process.env.PORT || 5000;
