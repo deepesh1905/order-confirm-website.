@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - OrderConfirm Bot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .form-box { background: #111; padding: 40px; border: 1px solid #222; border-radius: 10px; width: 350px; text-align: center; }
+        .form-box h2 { font-size: 28px; margin-bottom: 20px; color: #25D366; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #222; color: white; border: 1px solid #333; border-radius: 5px; outline: none; }
+        button { width: 100%; padding: 12px; margin-top: 10px; background: #25D366; color: black; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #20b858; }
+        a { color: #aaa; text-decoration: none; font-size: 14px; }
+        a:hover { color: #25D366; }
+    </style>
+</head>
+<body>
+
+    <div class="form-box">
+        <h2>Login Karo</h2>
+        <form id="loginForm">
+            <input type="email" id="email" placeholder="Email Address" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p style="margin-top: 20px;"><a href="signup.html">Account nahi hai? Naya banayein</a></p>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // Aapka LIVE Render Database se connection
+                const response = await fetch('https://order-confirm-website.onrender.com/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('token', result.token); 
+                    alert('Login Successful! ✅');
+                    window.location.href = 'Dashboard.html'; // Login hote hi Dashboard par bhejega
+                } else {
+                    alert('❌ Error: ' + (result.message || 'Email ya Password galat hai!'));
+                }
+            } catch (err) {
+                alert('⚠️ Server se connect nahi ho pa raha.');
+            }
+        });
+    </script>
+
+</body>
+</html>

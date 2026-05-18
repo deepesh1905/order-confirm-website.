@@ -98,6 +98,37 @@ app.post('/api/login', async (req, res) => {
 });
 
 // ==========================================
+// 3. DASHBOARD DATA ROUTE (Asli Data Lana)
+// ==========================================
+app.get('/api/me', async (req, res) => {
+    try {
+        const tokenHeader = req.headers.authorization;
+        if (!tokenHeader) return res.status(401).json({ message: 'Token missing!' });
+
+        // Token ko kholna
+        const token = tokenHeader.split(" ")[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'orderconfirm_secret_123');
+        
+        // Database se current user ka saara data nikalna
+        const seller = await mongoose.connection.collection('sellers').findOne({ _id: new mongoose.Types.ObjectId(decoded.id) });
+        
+        if (!seller) return res.status(404).json({ message: 'User nahi mila' });
+
+        // Dashboard ke liye asli data bhejna
+        res.json({
+            name: seller.name,
+            wallet: seller.wallet,
+            totalOrders: seller.totalOrders,
+            freeTrialUsed: seller.freeTrialUsed,
+            freeTrialLimit: seller.freeTrialLimit,
+            apiKey: seller.apiKey
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Token galat hai ya expire ho gaya' });
+    }
+});
+
+// ==========================================
 // SERVER START
 // ==========================================
 const PORT = process.env.PORT || 5000;
