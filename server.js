@@ -87,7 +87,7 @@ app.get('/api/me', async (req, res) => {
 });
 
 // ==========================================
-// 4. NEW ORDER ROUTE (WITH SECURE WHATSAPP)
+// 4. NEW ORDER ROUTE (WITH INTERACTIVE BUTTONS 🚀)
 // ==========================================
 app.post('/api/new-order', async (req, res) => {
     try {
@@ -109,11 +109,10 @@ app.post('/api/new-order', async (req, res) => {
 
         await mongoose.connection.collection('sellers').updateOne({ _id: seller._id }, updateQuery);
 
-        // Render ki tijori se keys nikalna (Secure 🔒)
         const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN; 
         const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
 
-        // WHATSAPP MESSAGE BHEJNA
+        // WHATSAPP BUTTON MESSAGE BHEJNA
         if (WHATSAPP_TOKEN && PHONE_NUMBER_ID) {
             try {
                 await fetch(`https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`, {
@@ -125,21 +124,40 @@ app.post('/api/new-order', async (req, res) => {
                     body: JSON.stringify({
                         messaging_product: "whatsapp",
                         to: customerPhone,
-                        type: "text",
-                        text: { 
-                            body: `✅ *Order Confirmed!*\n\nHi ${customerName},\nAapka order #${orderId} (₹${amount}) successfully confirm ho gaya hai.\n\nThank you for shopping with ${seller.business || seller.name}! 🎉` 
+                        type: "interactive",
+                        interactive: {
+                            type: "button",
+                            body: {
+                                text: `📦 *New Order Received!*\n\nHi ${customerName},\nAapka order #${orderId} (₹${amount}) humare paas aa gaya hai.\n\nKripya apna order aur address confirm karein:`
+                            },
+                            action: {
+                                buttons: [
+                                    {
+                                        type: "reply",
+                                        reply: {
+                                            id: `CONFIRM_${orderId}`,
+                                            title: "✅ Confirm Order"
+                                        }
+                                    },
+                                    {
+                                        type: "reply",
+                                        reply: {
+                                            id: `CANCEL_${orderId}`,
+                                            title: "❌ Cancel Order"
+                                        }
+                                    }
+                                ]
+                            }
                         }
                     })
                 });
-                console.log("WhatsApp message gya:", customerPhone);
+                console.log("WhatsApp Button message gya:", customerPhone);
             } catch (waError) {
                 console.log("WhatsApp API error:", waError);
             }
-        } else {
-            console.log("WhatsApp keys are missing in Environment Variables!");
         }
 
-        res.status(200).json({ success: true, message: `Order ${orderId} successful! Balance update & WhatsApp triggered.` });
+        res.status(200).json({ success: true, message: `Order ${orderId} successful! Balance update & WhatsApp Buttons triggered.` });
 
     } catch (err) {
         console.error(err);
@@ -150,12 +168,8 @@ app.post('/api/new-order', async (req, res) => {
 // ==========================================
 // 5. META WHATSAPP WEBHOOK (REPLY SUNNE KE LIYE)
 // ==========================================
-
-// Meta Webhook Verification (Meta check karega ki humara server zinda hai ya nahi)
 app.get('/webhook', (req, res) => {
-    // Ye code aapke aur Meta ke beech ka password hai
     const VERIFY_TOKEN = process.env.WEBHOOK_VERIFY_TOKEN || "deepesh_webhook_123";
-    
     let mode = req.query["hub.mode"];
     let token = req.query["hub.verify_token"];
     let challenge = req.query["hub.challenge"];
@@ -170,21 +184,17 @@ app.get('/webhook', (req, res) => {
     }
 });
 
-// Customer ka Button Reply Receive karna
 app.post('/webhook', (req, res) => {
     let body = req.body;
 
     if (body.object) {
         if (body.entry && body.entry[0].changes && body.entry[0].changes[0].value.messages && body.entry[0].changes[0].value.messages[0]) {
-            let from = body.entry[0].changes[0].value.messages[0].from; // Customer ka number
+            let from = body.entry[0].changes[0].value.messages[0].from; 
             let msg_body = body.entry[0].changes[0].value.messages[0];
 
-            // Check karna ki kya customer ne Button (Interactive) dabaya hai
             if (msg_body.type === "interactive") {
-                let button_reply = msg_body.interactive.button_reply.id; // Button ki ID
+                let button_reply = msg_body.interactive.button_reply.id; 
                 console.log(`\n🔥 JABARDAST! Customer ${from} ne button dabaya: ${button_reply}`);
-                
-                // Yahan hum aage chalkar apne Dashboard ka status update karenge
             } else {
                 console.log(`Customer ${from} ne text bheja:`, msg_body.text?.body);
             }
