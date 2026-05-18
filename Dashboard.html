@@ -71,17 +71,15 @@
 </head>
 <body>
 
-    <!-- Navbar -->
     <nav>
         <div class="logo">✅ OrderConfirm</div>
         <div class="user-info">
-            <span>👋 Namaste, Seller!</span>
-            <button class="btn-logout" onclick="window.location.href='index.html'">Logout</button>
+            <span id="sellerName">⏳ Loading...</span>
+            <button class="btn-logout" onclick="logout()">Logout</button>
         </div>
     </nav>
 
     <div class="layout">
-        <!-- Sidebar -->
         <div class="sidebar">
             <div class="sidebar-item active">📊 Dashboard</div>
             <div class="sidebar-item">📦 Orders</div>
@@ -91,55 +89,51 @@
             <div class="sidebar-item">📞 Support</div>
         </div>
 
-        <!-- Main -->
         <div class="main">
             <h1>Aapka <span>Dashboard</span></h1>
             <p class="subtitle">Aaj ke orders aur confirmations ka overview</p>
 
-            <!-- Stats -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="label">📦 Aaj Ke Orders</div>
-                    <div class="value">24</div>
-                    <div class="sub">+5 kal se zyada</div>
+                    <div class="label">📦 Total Orders</div>
+                    <div class="value" id="totalOrders">0</div>
+                    <div class="sub">Lifetime processed</div>
                 </div>
                 <div class="stat-card">
                     <div class="label">✅ Confirmed</div>
-                    <div class="value">18</div>
-                    <div class="sub">75% confirmation rate</div>
+                    <div class="value">0</div>
+                    <div class="sub">Coming Soon</div>
                 </div>
                 <div class="stat-card">
                     <div class="label">❌ Rejected</div>
-                    <div class="value">3</div>
-                    <div class="sub">RTO se bacha</div>
+                    <div class="value">0</div>
+                    <div class="sub">Coming Soon</div>
                 </div>
                 <div class="stat-card">
                     <div class="label">⏳ Pending</div>
-                    <div class="value">3</div>
-                    <div class="sub">Reply ka wait</div>
+                    <div class="value">0</div>
+                    <div class="sub">Coming Soon</div>
                 </div>
             </div>
 
-            <!-- Wallet & Trial -->
             <div class="wallet-section">
                 <div class="wallet-card">
                     <h3>💰 Wallet Balance</h3>
-                    <div class="wallet-balance">₹245 <span>remaining</span></div>
-                    <p style="color:#aaa; font-size:13px;">~49 orders bache hain</p>
+                    <div class="wallet-balance"><strong id="walletBalance">₹ 0</strong> <span>remaining</span></div>
+                    <p style="color:#aaa; font-size:13px;">Recharge feature coming soon</p>
                     <button class="recharge-btn">+ Wallet Recharge Karo</button>
                 </div>
                 <div class="trial-card">
                     <h3>🎉 Free Trial</h3>
-                    <p style="color:#aaa; font-size:13px;">3/10 free orders use ho gaye</p>
+                    <p style="color:#aaa; font-size:13px;"><span id="freeTrialUsed">0</span>/10 free orders use ho gaye</p>
                     <div class="progress-bar">
-                        <div class="progress-fill" style="width:30%"></div>
+                        <div class="progress-fill" style="width:0%" id="trialProgress"></div>
                     </div>
-                    <p class="trial-info">7 free orders baaki hain!</p>
+                    <p class="trial-info">Free orders baaki hain!</p>
                     <p style="color:#555; font-size:12px; margin-top:10px;">Trial khatam hone ke baad ₹5/order charge hoga</p>
                 </div>
             </div>
 
-            <!-- Recent Orders -->
             <div class="orders-section">
                 <h3>📋 Recent Orders</h3>
                 <table>
@@ -151,59 +145,90 @@
                         <th>Time</th>
                     </tr>
                     <tr>
-                        <td>#ORD001</td>
-                        <td>Rahul Sharma</td>
-                        <td>₹499</td>
-                        <td><span class="status-confirmed">✅ Confirmed</span></td>
-                        <td>2 min ago</td>
-                    </tr>
-                    <tr>
-                        <td>#ORD002</td>
-                        <td>Priya Singh</td>
-                        <td>₹899</td>
-                        <td><span class="status-pending">⏳ Pending</span></td>
-                        <td>5 min ago</td>
-                    </tr>
-                    <tr>
-                        <td>#ORD003</td>
-                        <td>Amit Kumar</td>
-                        <td>₹299</td>
-                        <td><span class="status-rejected">❌ Rejected</span></td>
-                        <td>12 min ago</td>
-                    </tr>
-                    <tr>
-                        <td>#ORD004</td>
-                        <td>Sneha Patel</td>
-                        <td>₹1299</td>
-                        <td><span class="status-confirmed">✅ Confirmed</span></td>
-                        <td>18 min ago</td>
+                        <td colspan="5" style="text-align: center; padding: 20px; color: #888;">Live orders abhi shuru nahi hue hain...</td>
                     </tr>
                 </table>
             </div>
 
-            <!-- API Setup -->
             <div class="api-section">
                 <h3>🔗 API Integration</h3>
                 <p style="color:#aaa; font-size:13px; margin-bottom:15px;">Ye API key apne store mein use karo — order aate hi automatically message jayega!</p>
-                <div class="api-key-box">sk_live_XXXXXXXXXXXXXXXXXXXX</div>
-                <button class="copy-btn" onclick="alert('API Key copy ho gaya!')">📋 Copy API Key</button>
+                <div class="api-key-box" id="apiKeyBox">⏳ Fetching API Key...</div>
+                <button class="copy-btn" onclick="copyApi()">📋 Copy API Key</button>
                 
                 <p style="color:#aaa; font-size:13px; margin-top:20px; margin-bottom:10px;">Example API Call:</p>
                 <div class="api-example">
-POST https://rto-ecom-bot.onrender.com/new-order<br>
+POST https://order-confirm-website.onrender.com/api/new-order<br>
 {<br>
 &nbsp;&nbsp;"customerPhone": "919876543210",<br>
 &nbsp;&nbsp;"customerName": "Rahul",<br>
 &nbsp;&nbsp;"address": "123 Delhi",<br>
 &nbsp;&nbsp;"orderId": "ORD001",<br>
 &nbsp;&nbsp;"amount": "499",<br>
-&nbsp;&nbsp;"apiKey": "sk_live_XXXX"<br>
+&nbsp;&nbsp;"apiKey": <span id="exampleApiKey">"sk_live_XXXX"</span><br>
 }
                 </div>
             </div>
 
         </div>
     </div>
+
+    <script>
+        // Copy API Button function
+        function copyApi() {
+            const apiKey = document.getElementById('apiKeyBox').innerText;
+            navigator.clipboard.writeText(apiKey);
+            alert('Aapki Secret API Key copy ho gayi hai! ✅');
+        }
+
+        // Logout Button function
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+
+        // Server se asli data laane wala jadoo
+        window.onload = async function() {
+            const token = localStorage.getItem('token');
+            
+            // Security: Agar VIP token nahi hai, to login par fek do
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                // Render live server ko request bhejna
+                const response = await fetch('https://order-confirm-website.onrender.com/api/me', {
+                    method: 'GET',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Agar sab sahi hai to design mein data chipka do
+                    document.getElementById('sellerName').innerText = '👋 Namaste, ' + data.name + '!';
+                    document.getElementById('walletBalance').innerText = '₹ ' + data.wallet;
+                    document.getElementById('totalOrders').innerText = data.totalOrders;
+                    document.getElementById('apiKeyBox').innerText = data.apiKey;
+                    document.getElementById('exampleApiKey').innerText = '"' + data.apiKey + '"';
+                    document.getElementById('freeTrialUsed').innerText = data.freeTrialUsed;
+                    
+                    // Trial progress bar set karna
+                    const progress = (data.freeTrialUsed / 10) * 100;
+                    document.getElementById('trialProgress').style.width = progress + '%';
+
+                } else {
+                    // Agar server ne pehchanne se mana kar diya to wapas login pe
+                    localStorage.removeItem('token');
+                    window.location.href = 'login.html';
+                }
+            } catch (err) {
+                console.log("Server error", err);
+            }
+        }
+    </script>
 
 </body>
 </html>
