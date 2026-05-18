@@ -64,7 +64,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 // ==========================================
-// 3. DASHBOARD DATA ROUTE
+// 3. DASHBOARD DATA ROUTE (UPGRADED FOR STATUS COUNTS)
 // ==========================================
 app.get('/api/me', async (req, res) => {
     try {
@@ -77,8 +77,15 @@ app.get('/api/me', async (req, res) => {
         const seller = await mongoose.connection.collection('sellers').findOne({ _id: new mongoose.Types.ObjectId(decoded.id) });
         if (!seller) return res.status(404).json({ message: 'User nahi mila' });
 
+        // Database se orders ke status ginna
+        const totalOrders = await mongoose.connection.collection('orders').countDocuments({ sellerId: seller._id.toString() });
+        const confirmedOrders = await mongoose.connection.collection('orders').countDocuments({ sellerId: seller._id.toString(), status: 'Confirmed' });
+        const rejectedOrders = await mongoose.connection.collection('orders').countDocuments({ sellerId: seller._id.toString(), status: 'Rejected' });
+        const pendingOrders = await mongoose.connection.collection('orders').countDocuments({ sellerId: seller._id.toString(), status: 'Pending' });
+
         res.json({
-            name: seller.name, wallet: seller.wallet, totalOrders: seller.totalOrders,
+            name: seller.name, wallet: seller.wallet, totalOrders,
+            confirmedOrders, rejectedOrders, pendingOrders,
             freeTrialUsed: seller.freeTrialUsed, freeTrialLimit: seller.freeTrialLimit, apiKey: seller.apiKey
         });
     } catch (err) {
@@ -87,7 +94,7 @@ app.get('/api/me', async (req, res) => {
 });
 
 // ==========================================
-// 4. NEW ORDER ROUTE (WITH INTERACTIVE BUTTONS 🚀)
+// 4. NEW ORDER ROUTE (SAVES TO DATABASE & SENDS BUTTONS)
 // ==========================================
 app.post('/api/new-order', async (req, res) => {
     try {
@@ -100,14 +107,27 @@ app.post('/api/new-order', async (req, res) => {
         // Balance Check & Deduct
         let updateQuery = {};
         if (seller.freeTrialUsed < seller.freeTrialLimit) {
-            updateQuery = { $inc: { freeTrialUsed: 1, totalOrders: 1 } };
+            updateQuery = { $inc: { freeTrialUsed: 1 } };
         } else if (seller.wallet >= 5) {
-            updateQuery = { $inc: { wallet: -5, totalOrders: 1 } };
+            updateQuery = { $inc: { wallet: -5 } };
         } else {
             return res.status(402).json({ success: false, message: 'Recharge karo bhai! Balance zero hai.' });
         }
 
+        // Seller balance update
         await mongoose.connection.collection('sellers').updateOne({ _id: seller._id }, updateQuery);
+
+        // Order ko database mein save karna (Hisaab rakhne ke liye)
+        const newOrderData = {
+            orderId,
+            sellerId: seller._id.toString(),
+            customerName,
+            customerPhone,
+            amount,
+            status: 'Pending', // Shuruat mein pending rahega
+            createdAt: new Date()
+        };
+        await mongoose.connection.collection('orders').insertOne(newOrderData);
 
         const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN; 
         const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
@@ -157,7 +177,7 @@ app.post('/api/new-order', async (req, res) => {
             }
         }
 
-        res.status(200).json({ success: true, message: `Order ${orderId} successful! Balance update & WhatsApp Buttons triggered.` });
+        res.status(200).json({ success: true, message: `Order ${orderId} successful! Saved & Buttons triggered.` });
 
     } catch (err) {
         console.error(err);
@@ -166,7 +186,7 @@ app.post('/api/new-order', async (req, res) => {
 });
 
 // ==========================================
-// 5. META WHATSAPP WEBHOOK (REPLY SUNNE KE LIYE)
+// 5. META WHATSAPP WEBHOOK (LIVE DATABASE RE-ACTION)
 // ==========================================
 app.get('/webhook', (req, res) => {
     const VERIFY_TOKEN = process.env.WEBHOOK_VERIFY_TOKEN || "deepesh_webhook_123";
@@ -184,7 +204,7 @@ app.get('/webhook', (req, res) => {
     }
 });
 
-app.post('/webhook', (req, res) => {
+app.post('/webhook', async (req, res) => {
     let body = req.body;
 
     if (body.object) {
@@ -193,10 +213,22 @@ app.post('/webhook', (req, res) => {
             let msg_body = body.entry[0].changes[0].value.messages[0];
 
             if (msg_body.type === "interactive") {
-                let button_reply = msg_body.interactive.button_reply.id; 
-                console.log(`\n🔥 JABARDAST! Customer ${from} ne button dabaya: ${button_reply}`);
-            } else {
-                console.log(`Customer ${from} ne text bheja:`, msg_body.text?.body);
+                let button_id = msg_body.interactive.button_reply.id; 
+                console.log(`\n🔥 JABARDAST! Customer ${from} ne button dabaya: ${button_id}`);
+
+                // Jadoo: Button ID se check karna ki Confirm dabaya ya Cancel
+                if (button_id.startsWith("CONFIRM_")) {
+                    const actualOrderId = button_id.replace("CONFIRM_", "");
+                    // Database mein order ka status 'Confirmed' karna
+                    await mongoose.connection.collection('orders').updateOne({ orderId: actualOrderId }, { $set: { status: 'Confirmed' } });
+                    console.log(`Database updated: Order ${actualOrderId} is now Confirmed! ✅`);
+                } 
+                else if (button_id.startsWith("CANCEL_")) {
+                    const actualOrderId = button_id.replace("CANCEL_", "");
+                    // Database mein order ka status 'Rejected' karna
+                    await mongoose.connection.collection('orders').updateOne({ orderId: actualOrderId }, { $set: { status: 'Rejected' } });
+                    console.log(`Database updated: Order ${actualOrderId} is now Rejected! ❌`);
+                }
             }
         }
         res.sendStatus(200);
