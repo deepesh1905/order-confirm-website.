@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrderConfirm Bot - WhatsApp Order Confirmation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; }
+        
+        /* Navbar */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; background: #111; border-bottom: 1px solid #222; }
+        nav .logo { font-size: 24px; font-weight: bold; color: #25D366; }
+        nav .nav-links a { color: white; text-decoration: none; margin-left: 30px; font-size: 15px; }
+        nav .nav-links a:hover { color: #25D366; }
+        nav .btn-login { background: #25D366; color: white; padding: 10px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; }
+
+        /* Hero */
+        .hero { text-align: center; padding: 100px 20px; background: linear-gradient(135deg, #0a0a0a, #1a1a2e); }
+        .hero h1 { font-size: 52px; font-weight: 800; margin-bottom: 20px; }
+        .hero h1 span { color: #25D366; }
+        .hero p { font-size: 20px; color: #aaa; margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .hero-btns { display: flex; gap: 20px; justify-content: center; }
+        .btn-primary { background: #25D366; color: white; padding: 15px 40px; border-radius: 30px; text-decoration: none; font-size: 18px; font-weight: bold; }
+        .btn-secondary { background: transparent; color: white; padding: 15px 40px; border-radius: 30px; text-decoration: none; font-size: 18px; border: 2px solid #25D366; }
+
+        /* Stats */
+        .stats { display: flex; justify-content: center; gap: 60px; padding: 60px 20px; background: #111; }
+        .stat { text-align: center; }
+        .stat h2 { font-size: 42px; color: #25D366; font-weight: 800; }
+        .stat p { color: #aaa; font-size: 16px; }
+
+        /* Features */
+        .features { padding: 80px 50px; text-align: center; }
+        .features h2 { font-size: 38px; margin-bottom: 60px; }
+        .features h2 span { color: #25D366; }
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; max-width: 1000px; margin: 0 auto; }
+        .feature-card { background: #111; padding: 40px 30px; border-radius: 15px; border: 1px solid #222; }
+        .feature-card .icon { font-size: 40px; margin-bottom: 20px; }
+        .feature-card h3 { font-size: 20px; margin-bottom: 15px; color: #25D366; }
+        .feature-card p { color: #aaa; line-height: 1.6; }
+
+        /* Pricing */
+        .pricing { padding: 80px 20px; background: #111; text-align: center; }
+        .pricing h2 { font-size: 38px; margin-bottom: 20px; }
+        .pricing h2 span { color: #25D366; }
+        .pricing p { color: #aaa; margin-bottom: 60px; font-size: 18px; }
+        .pricing-card { background: #1a1a1a; border: 2px solid #25D366; border-radius: 20px; padding: 50px; max-width: 400px; margin: 0 auto; }
+        .pricing-card h3 { font-size: 28px; margin-bottom: 10px; }
+        .price { font-size: 60px; font-weight: 800; color: #25D366; }
+        .price span { font-size: 20px; color: #aaa; }
+        .pricing-features { list-style: none; margin: 30px 0; text-align: left; }
+        .pricing-features li { padding: 10px 0; color: #aaa; border-bottom: 1px solid #222; }
+        .pricing-features li::before { content: "✅ "; }
+
+        /* How it works */
+        .how { padding: 80px 50px; text-align: center; }
+        .how h2 { font-size: 38px; margin-bottom: 60px; }
+        .how h2 span { color: #25D366; }
+        .steps { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+        .step { background: #111; padding: 40px 30px; border-radius: 15px; max-width: 220px; }
+        .step-num { width: 50px; height: 50px; background: #25D366; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; margin: 0 auto 20px; }
+        .step h3 { margin-bottom: 10px; }
+        .step p { color: #aaa; font-size: 14px; }
+
+        /* CTA */
+        .cta { padding: 100px 20px; text-align: center; background: linear-gradient(135deg, #1a1a2e, #0a0a0a); }
+        .cta h2 { font-size: 42px; margin-bottom: 20px; }
+        .cta h2 span { color: #25D366; }
+        .cta p { color: #aaa; font-size: 18px; margin-bottom: 40px; }
+
+        /* Footer */
+        footer { background: #111; padding: 30px; text-align: center; color: #aaa; border-top: 1px solid #222; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav>
+        <div class="logo">✅ OrderConfirm</div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#how">How it Works</a>
+        </div>
+        <a href="signup.html" class="btn-login">Free Trial Shuru Karo</a>
+    </nav>
+
+    <!-- Hero -->
+    <div class="hero">
+        <h1>RTO Returns <span>50% Kam Karo</span><br>WhatsApp Bot Se!</h1>
+        <p>Order aate hi customer ka address confirm karo — automatically!Sirf ₹5 per order.</p>
+        <div class="hero-btns">
+            <a href="signup.html" class="btn-primary">🚀 Free Trial Shuru Karo</a>
+            <a href="#how" class="btn-secondary">Kaise Kaam Karta Hai?</a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+        <div class="stat">
+            <h2>50%</h2>
+            <p>RTO Returns Kam</p>
+        </div>
+        <div class="stat">
+            <h2>₹5</h2>
+            <p>Per Order Only</p>
+        </div>
+        <div class="stat">
+            <h2>24/7</h2>
+            <p>Automatic Bot</p>
+        </div>
+        <div class="stat">
+            <h2>10</h2>
+            <p>Free Trial Orders</p>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div class="features" id="features">
+        <h2>Kyun Choose Karein <span>OrderConfirm?</span></h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="icon">📦</div>
+                <h3>Auto Order Confirmation</h3>
+                <p>Order aate hi customer ko WhatsApp message automatic jata hai</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📍</div>
+                <h3>Address Verification</h3>
+                <p>Customer apna address confirm karta hai — galat address se returns band</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🤖</div>
+                <h3>AI Powered</h3>
+                <p>Smart AI jo customer ke sawaalon ka jawab deta hai automatically</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">💰</div>
+                <h3>Sirf ₹5/Order</h3>
+                <p>Bahut sasta — ek return bachao, 100 orders ka paisa niklo</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">⚡</div>
+                <h3>Instant Setup</h3>
+                <p>5 minute mein setup — koi technical knowledge nahi chahiye</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📊</div>
+                <h3>Dashboard</h3>
+                <p>Sab orders ka status ek jagah dekho — real time analytics</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="how" id="how">
+        <h2>Kaise Kaam Karta Hai <span>OrderConfirm?</span></h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <h3>Signup Karo</h3>
+                <p>Free account banao aur 10 orders ka free trial lo</p>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <h3>Connect Karo</h3>
+                <p>Apna store OrderConfirm se connect karo</p>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <h3>Auto Message</h3>
+                <p>Order aate hi customer ko WhatsApp message jata hai</p>
+            </div>
+            <div class="step">
+                <div class="step-num">4</div>
+                <h3>Returns Kam!</h3>
+                <p>Customer confirm karta hai — RTO returns 50% kam hote hain</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing -->
+    <div class="pricing" id="pricing">
+        <h2>Simple <span>Pricing</span></h2>
+        <p>Sirf confirm hue orders ka paisa do — koi monthly charge nahi!</p>
+        <div class="pricing-card">
+            <h3>Pay Per Order</h3>
+            <div class="price">₹5 <span>/order</span></div>
+            <ul class="pricing-features">
+                <li>10 Orders FREE Trial</li>
+                <li>Auto WhatsApp Message</li>
+                <li>Address Verification</li>
+                <li>AI Customer Support</li>
+                <li>Real-time Dashboard</li>
+                <li>24/7 Bot Active</li>
+            </ul>
+            <a href="signup.html" class="btn-primary" style="display:block; text-align:center; padding:15px;">Free Trial Shuru Karo 🚀</a>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta">
+        <h2>Ready to <span>Reduce Returns?</span></h2>
+        <p>Aaj hi shuru karo — 10 orders bilkul free!</p>
+        <a href="signup.html" class="btn-primary">🚀 Free Trial Shuru Karo</a>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2025 OrderConfirm Bot | Made with ❤️ in India</p>
+    </footer>
+
+</body>
+</html>

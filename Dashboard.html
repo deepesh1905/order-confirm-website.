@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - OrderConfirm Bot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; }
+        
+        /* Navbar */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #111; border-bottom: 1px solid #222; }
+        nav .logo { font-size: 22px; font-weight: bold; color: #25D366; }
+        nav .user-info { display: flex; align-items: center; gap: 15px; }
+        nav .user-info span { color: #aaa; font-size: 14px; }
+        nav .btn-logout { background: #333; color: white; padding: 8px 20px; border-radius: 20px; border: none; cursor: pointer; font-size: 14px; }
+
+        /* Layout */
+        .layout { display: flex; min-height: calc(100vh - 60px); }
+        
+        /* Sidebar */
+        .sidebar { width: 220px; background: #111; border-right: 1px solid #222; padding: 20px 0; }
+        .sidebar-item { padding: 14px 25px; cursor: pointer; color: #aaa; font-size: 15px; display: flex; align-items: center; gap: 10px; }
+        .sidebar-item:hover { background: #1a1a1a; color: white; }
+        .sidebar-item.active { background: #1a2e1a; color: #25D366; border-right: 3px solid #25D366; }
+
+        /* Main Content */
+        .main { flex: 1; padding: 30px; }
+        .main h1 { font-size: 26px; margin-bottom: 5px; }
+        .main h1 span { color: #25D366; }
+        .main .subtitle { color: #aaa; margin-bottom: 30px; font-size: 14px; }
+
+        /* Stats Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: #111; border: 1px solid #222; border-radius: 15px; padding: 25px; }
+        .stat-card .label { color: #aaa; font-size: 13px; margin-bottom: 10px; }
+        .stat-card .value { font-size: 32px; font-weight: 800; color: #25D366; }
+        .stat-card .sub { color: #555; font-size: 12px; margin-top: 5px; }
+
+        /* Wallet Card */
+        .wallet-section { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .wallet-card { background: #111; border: 1px solid #25D366; border-radius: 15px; padding: 25px; }
+        .wallet-card h3 { color: #25D366; margin-bottom: 15px; font-size: 18px; }
+        .wallet-balance { font-size: 42px; font-weight: 800; margin-bottom: 5px; }
+        .wallet-balance span { font-size: 16px; color: #aaa; }
+        .recharge-btn { background: #25D366; color: white; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: bold; margin-top: 15px; width: 100%; }
+
+        .trial-card { background: #111; border: 1px solid #333; border-radius: 15px; padding: 25px; }
+        .trial-card h3 { margin-bottom: 15px; font-size: 18px; }
+        .progress-bar { background: #222; border-radius: 10px; height: 12px; margin: 10px 0; }
+        .progress-fill { background: #25D366; border-radius: 10px; height: 12px; width: 30%; }
+        .trial-info { color: #aaa; font-size: 13px; }
+
+        /* Orders Table */
+        .orders-section { background: #111; border: 1px solid #222; border-radius: 15px; padding: 25px; }
+        .orders-section h3 { margin-bottom: 20px; font-size: 18px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px 15px; color: #aaa; font-size: 13px; border-bottom: 1px solid #222; }
+        td { padding: 14px 15px; font-size: 14px; border-bottom: 1px solid #1a1a1a; }
+        .status-confirmed { background: #1a2e1a; color: #25D366; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        .status-pending { background: #2e2a1a; color: #f0a500; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        .status-rejected { background: #2e1a1a; color: #ff4444; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+
+        /* API Section */
+        .api-section { background: #111; border: 1px solid #222; border-radius: 15px; padding: 25px; margin-top: 20px; }
+        .api-section h3 { margin-bottom: 15px; }
+        .api-key-box { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 15px; font-family: monospace; font-size: 13px; color: #25D366; word-break: break-all; }
+        .copy-btn { background: #333; color: white; border: none; padding: 8px 20px; border-radius: 8px; cursor: pointer; margin-top: 10px; font-size: 13px; }
+        .api-example { background: #1a1a1a; border-radius: 10px; padding: 15px; margin-top: 15px; font-family: monospace; font-size: 12px; color: #aaa; overflow-x: auto; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav>
+        <div class="logo">✅ OrderConfirm</div>
+        <div class="user-info">
+            <span>👋 Namaste, Seller!</span>
+            <button class="btn-logout" onclick="window.location.href='index.html'">Logout</button>
+        </div>
+    </nav>
+
+    <div class="layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-item active">📊 Dashboard</div>
+            <div class="sidebar-item">📦 Orders</div>
+            <div class="sidebar-item">💰 Wallet</div>
+            <div class="sidebar-item">🔗 API Setup</div>
+            <div class="sidebar-item">⚙️ Settings</div>
+            <div class="sidebar-item">📞 Support</div>
+        </div>
+
+        <!-- Main -->
+        <div class="main">
+            <h1>Aapka <span>Dashboard</span></h1>
+            <p class="subtitle">Aaj ke orders aur confirmations ka overview</p>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="label">📦 Aaj Ke Orders</div>
+                    <div class="value">24</div>
+                    <div class="sub">+5 kal se zyada</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">✅ Confirmed</div>
+                    <div class="value">18</div>
+                    <div class="sub">75% confirmation rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">❌ Rejected</div>
+                    <div class="value">3</div>
+                    <div class="sub">RTO se bacha</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">⏳ Pending</div>
+                    <div class="value">3</div>
+                    <div class="sub">Reply ka wait</div>
+                </div>
+            </div>
+
+            <!-- Wallet & Trial -->
+            <div class="wallet-section">
+                <div class="wallet-card">
+                    <h3>💰 Wallet Balance</h3>
+                    <div class="wallet-balance">₹245 <span>remaining</span></div>
+                    <p style="color:#aaa; font-size:13px;">~49 orders bache hain</p>
+                    <button class="recharge-btn">+ Wallet Recharge Karo</button>
+                </div>
+                <div class="trial-card">
+                    <h3>🎉 Free Trial</h3>
+                    <p style="color:#aaa; font-size:13px;">3/10 free orders use ho gaye</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width:30%"></div>
+                    </div>
+                    <p class="trial-info">7 free orders baaki hain!</p>
+                    <p style="color:#555; font-size:12px; margin-top:10px;">Trial khatam hone ke baad ₹5/order charge hoga</p>
+                </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <div class="orders-section">
+                <h3>📋 Recent Orders</h3>
+                <table>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Time</th>
+                    </tr>
+                    <tr>
+                        <td>#ORD001</td>
+                        <td>Rahul Sharma</td>
+                        <td>₹499</td>
+                        <td><span class="status-confirmed">✅ Confirmed</span></td>
+                        <td>2 min ago</td>
+                    </tr>
+                    <tr>
+                        <td>#ORD002</td>
+                        <td>Priya Singh</td>
+                        <td>₹899</td>
+                        <td><span class="status-pending">⏳ Pending</span></td>
+                        <td>5 min ago</td>
+                    </tr>
+                    <tr>
+                        <td>#ORD003</td>
+                        <td>Amit Kumar</td>
+                        <td>₹299</td>
+                        <td><span class="status-rejected">❌ Rejected</span></td>
+                        <td>12 min ago</td>
+                    </tr>
+                    <tr>
+                        <td>#ORD004</td>
+                        <td>Sneha Patel</td>
+                        <td>₹1299</td>
+                        <td><span class="status-confirmed">✅ Confirmed</span></td>
+                        <td>18 min ago</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- API Setup -->
+            <div class="api-section">
+                <h3>🔗 API Integration</h3>
+                <p style="color:#aaa; font-size:13px; margin-bottom:15px;">Ye API key apne store mein use karo — order aate hi automatically message jayega!</p>
+                <div class="api-key-box">sk_live_XXXXXXXXXXXXXXXXXXXX</div>
+                <button class="copy-btn" onclick="alert('API Key copy ho gaya!')">📋 Copy API Key</button>
+                
+                <p style="color:#aaa; font-size:13px; margin-top:20px; margin-bottom:10px;">Example API Call:</p>
+                <div class="api-example">
+POST https://rto-ecom-bot.onrender.com/new-order<br>
+{<br>
+&nbsp;&nbsp;"customerPhone": "919876543210",<br>
+&nbsp;&nbsp;"customerName": "Rahul",<br>
+&nbsp;&nbsp;"address": "123 Delhi",<br>
+&nbsp;&nbsp;"orderId": "ORD001",<br>
+&nbsp;&nbsp;"amount": "499",<br>
+&nbsp;&nbsp;"apiKey": "sk_live_XXXX"<br>
+}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
